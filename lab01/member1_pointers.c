@@ -21,7 +21,15 @@ bool is_member(char **table, char *element) {
     return rv;
 }
 
+void print_names(char *table[]) {
+    for (int i = 0; table[i] != NULL; i++) {
+        printf("names[%d] = %s\n", i, table[i]);
+    }
+}
+
 int main(int argc, char **argv) {
+    
+    print_names(names);
     printf("is_member(names, \"baz\") = %d\n", is_member(names, "baz"));
     printf("is_member(names, \"goo\") = %d\n", is_member(names, "goo"));
     printf("is_member(names, \"moo\") = %d\n", is_member(names, "moo"));

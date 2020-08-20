@@ -37,7 +37,14 @@ bool list_is_member(struct list_st *list, char *element) {
     return rv;
 }
 
+void list_print(struct list_st *list) {
+    for (int i = 0; i < list->count; i++) {
+        printf("list[%d] = %s\n", i, list->table[i].value);
+    }
+}
+
 int main(int argc, char **argv) {
+  int rv;
     struct list_st list;
 
     list_init(&list);
@@ -47,9 +54,16 @@ int main(int argc, char **argv) {
     list_add(&list, "boo");
     list_add(&list, "goo");
 
-    printf("list_is_member(&list, \"baz\") = %d\n", list_is_member(&list, "baz"));
-    printf("list_is_member(&list, \"goo\") = %d\n", list_is_member(&list, "goo"));
-    printf("list_is_member(&list, \"moo\") = %d\n", list_is_member(&list, "moo"));
+    list_print(&list);
+    
+    rv = list_is_member(&list, "baz");
+    printf("is_member(&list, \"baz\") = %d\n", rv);
 
+    rv = list_is_member(&list, "goo");
+    printf("is_member(&list, \"goo\") = %d\n", rv);
+
+    rv = list_is_member(&list, "moo");
+    printf("is_member(&list, \"moo\") = %d\n", rv);
+    
     return 0;
 }
