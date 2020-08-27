@@ -1,72 +1,72 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_TOKEN_NAME 32
+#define SCAN_TOKEN_LEN 32
 
-typedef enum {
-    TT_EOT,
-    TT_PLUS,
-    TT_MINUS,
-    TT_MUL,
-    TT_DIV,
-} token_type;
+enum scan_token_enum {
+    TK_PLUS,
+    TK_MINUS,
+    TK_MUL,
+    TK_DIV,
+    TK_EOT,    
+};
 
-typedef struct {
-    char name[MAX_TOKEN_NAME];
-    token_type type;
-} token;
+struct scan_token_st {
+    char name[SCAN_TOKEN_LEN];
+    enum scan_token_enum id;
+};
 
-#define MAX_TOKENS 128
+#define SCAN_TOKEN_TABLE_LEN 1024
 
-typedef struct {
-    token list[MAX_TOKENS];
+struct scan_table_st {
+    struct scan_token_st table[SCAN_TOKEN_TABLE_LEN];
     int len;
-} token_table;
+};
 
-void token_table_init(token_table *tbl) {
-    tbl->len = 0;
+void scan_table_init(struct scan_table_st *st) {
+    st->len = 0;
 }
 
-void token_table_add(token_table *tbl, token_type t, char *n) {
-    tbl->list[tbl->len].type = t;
-    strncpy(tbl->list[tbl->len].name, n, MAX_TOKEN_NAME);
-    tbl->len += 1;
+void scan_table_add(struct scan_table_st *st, enum scan_token_enum id, char *n) {
+    st->table[st->len].id = id;
+    strncpy(st->table[st->len].name, n, SCAN_TOKEN_LEN);
+    st->len += 1;
 }
 
-char *token_table_scan(token_table *tbl, char *p, char *end) {
+char *scan_table_scan(struct scan_table_st *st, char *p, char *end) {
     if (p == end) {
-        token_table_add(tbl, TT_EOT, "");
+        scan_table_add(st, TK_EOT, "");
         return p;
     } else if (*p == '+') {
-        token_table_add(tbl, TT_PLUS, "+");
+        scan_table_add(st, TK_PLUS, "+");
     } else if (*p == '-') {
-        token_table_add(tbl, TT_MINUS, "-");
+        scan_table_add(st, TK_MINUS, "-");
     } else if (*p == '*') {
-        token_table_add(tbl, TT_MUL, "*");
+        scan_table_add(st, TK_MUL, "*");
     } else if (*p == '/') {
-        token_table_add(tbl, TT_DIV, "/");
+        scan_table_add(st, TK_DIV, "/");
     }
     return p + 1;
 }
 
-void token_table_print(token_table *tbl) {
-    char *token_names[] = {"TT_EOT", "TT_PLUS", "TT_MINUS", "TT_MUL", "TT_DIV"};
+void scan_table_print(struct scan_table_st *st) {
+    char *token_names[] = {"TK_PLUS", "TK_MINUS", "TK_MUL", "TK_DIV", "TK_EOT"};
 
-    for (int i = 0; i < tbl->len; i++) {
-        token *pt = &tbl->list[i];
-        printf("type: %s name: \"%s\"\n", token_names[pt->type], pt->name);
+    for (int i = 0; i < st->len; i++) {
+        struct scan_token_st *pt = &st->table[i];
+        printf("type: %s name: \"%s\"\n", token_names[pt->id], pt->name);
     }
 }
 
 int main(int argc, char **argv) {
-    token_table ttbl;
-    token_table_init(&ttbl);
+    struct scan_table_st scan_tbl;
+    scan_table_init(&scan_tbl);
 
     char *p = "+-*/";
     char *end = &p[strlen(p)];
     do {
-        p = token_table_scan(&ttbl, p, end);
+        p = scan_table_scan(&scan_tbl, p, end);
     } while (p != end);
-    token_table_print(&ttbl);
+    scan_table_print(&scan_tbl);
     return 0;
 }
