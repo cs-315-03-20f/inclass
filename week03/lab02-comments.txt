@@ -1,0 +1,5 @@
+"here is a " string"
+some more text"
+
+"here is a "
+"some more text"
