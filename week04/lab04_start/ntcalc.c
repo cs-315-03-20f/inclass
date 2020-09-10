@@ -9,17 +9,24 @@ int main(int argc, char **argv) {
 
     char input[SCAN_INPUT_LEN];
     int len;
+    int base = 10;
+    uint32_t result = 0;
 
-    if ((argc != 3) || (strncmp(argv[1], "-e", SCAN_TOKEN_LEN) != 0)) {
-        printf("usage: ntcalc -e \"expr\"\n");
-        printf("  example: ntcalc -e \"1 + 2\"\n");
-        exit(-1);
-    }
-
-    // printf("argv[2] = %s\n", argv[2]);
-    
-    strncpy(input, argv[2], SCAN_INPUT_LEN);
-    len = strnlen(input, SCAN_INPUT_LEN);
+    for (int a = 1; a < argc; a++) {
+        if (argv[a][0] == '-') {
+            switch (argv[a][1]) {
+                case 'e':
+                    strncpy(input, argv[a+1], SCAN_INPUT_LEN);
+                    len = strnlen(input, SCAN_INPUT_LEN);
+                    a++;
+                    break;
+                case 'b':
+                    base = atoi(argv[a+1]);
+                    a++;
+                    break;
+            }
+        }
+    }    
 
     scan_table_init(&scan_table);
     scan_table_scan(&scan_table, input, len);
@@ -29,8 +36,10 @@ int main(int argc, char **argv) {
     parse_tree = parse_expression(&parse_table, &scan_table);
     parse_tree_print(parse_tree);
 
-    uint32_t result = eval_tree(parse_tree);
-    printf("%d\n", result);
+    result = eval_tree(parse_tree);
+    /* you will need something like this
+     * eval_tree_print(result, base);
+     */
     
     return 0;
 }
