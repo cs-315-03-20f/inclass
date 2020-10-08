@@ -1,6 +1,6 @@
 PROG = week08
 
-OBJS = week08.o strcat_c.o strcat_s.o sum_array_rec_c.o sum_array_rec_s.o
+OBJS = week08.o strcat_c.o strcat_s.o sum_array_rec_c.o sum_array_rec_s.o substr_c.o substr_s.o
 
 %.o: %.c
 	gcc -c -g -o $@ $<
