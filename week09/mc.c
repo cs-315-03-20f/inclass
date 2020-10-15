@@ -13,7 +13,7 @@ uint32_t make_subtract(uint32_t i) {
     // clear out bits 21-24
     i &= 0xFE1FFFFF; // or 0b11111110000111111111111111111111
     // set bits 21-24 to be the opcode for SUB
-    i |= SUB_OPCODE << OPCODE_BIT;
+    i |= (SUB_OPCODE << OPCODE_BIT);
     return i;
 }
 
