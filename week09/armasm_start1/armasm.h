@@ -116,13 +116,14 @@ bx          ::= "bx"
 
 */
 
-enum parse_opcode_enum {OC_DP, OC_BX, OC_NONE};
+enum parse_opcode_enum {OC_DP, OC_BX, OC_MEM, OC_NONE};
 
-#define PARSE_DP_OPS {"add", NULL}
+#define PARSE_DP_OPS {"add", "sub", NULL}
 #define PARSE_BX_OPS {"bx", NULL}
+#define PARSE_MEM_OPS {"ldr", "str", NULL}
 
 enum parse_stmt_enum {INST, SEQ};
-enum parse_inst_enum {DP3, BX};
+enum parse_inst_enum {DP3, BX, MEM};
 
 struct parse_node_st {
     enum parse_stmt_enum type;
@@ -134,6 +135,7 @@ struct parse_node_st {
             union {
                 struct {int rd; int rn; int rm;} dp3;
                 struct bx {int rn;} bx;
+                struct {int rd; int rn; int rm;} mem;
             };
         } inst;
         struct {
@@ -195,7 +197,7 @@ struct codegen_map_st {
 };
 
 #define CODEGEN_OPCODE_MAP \
-    { {"add", 0b0100} };
+    { {"add", 0b0100}, {"sub", 0b0010} };
 
 enum codegen_cond {
     COND_EQ, COND_NE, COND_CS, COND_CC, COND_MI, COND_PL, COND_VS, COND_VC,

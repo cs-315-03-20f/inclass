@@ -68,6 +68,40 @@ void codegen_dp3(struct codegen_table_st *ct, struct parse_node_st *np) {
         np->stmt.inst.dp3.rm);
 }
 
+void codegen_mem_common(struct codegen_table_st *ct, char *name, uint32_t rd, 
+    uint32_t rn, uint32_t updown, uint32_t offset) {
+    const uint32_t MEM_CONST_BIT = 26;
+    const uint32_t MEM_IMM_BIT = 25;
+    const uint32_t MEM_PRE_BIT = 24;
+    const uint32_t MEM_UPDOWN_BIT = 23;
+    const uint32_t MEM_LDRSTR_BIT = 20;
+    const uint32_t MEM_RN_BIT = 16;
+    const uint32_t MEM_RD_BIT = 12;
+
+    uint32_t ls = !strcmp(name, "ldr") ? 1 : 0;
+    uint32_t inst = 0; /* imm = 0, byteword = 0, writeback = 0 */
+    inst = (COND_AL << COND_BIT)
+        | (0b01 << MEM_CONST_BIT)
+        | (1 << MEM_IMM_BIT)
+        | (1 << MEM_PRE_BIT)
+        | (updown << MEM_UPDOWN_BIT)
+        | (ls << MEM_LDRSTR_BIT)
+        | (rn << MEM_RN_BIT)
+        | (rd << MEM_RD_BIT)
+        | offset;
+    codegen_add_inst(ct, inst);
+}
+void codegen_mem(struct codegen_table_st *ct, struct parse_node_st *np) {
+    codegen_mem_common(
+        ct,
+        np->stmt.inst.name,
+        np->stmt.inst.mem.rd,
+        np->stmt.inst.mem.rn,
+        1, /*up*/
+        np->stmt.inst.mem.rm
+    );
+}
+
 void codegen_bx(struct codegen_table_st *ct, struct parse_node_st *np) {
     const uint32_t BX_CODE_BIT = 4;
     const uint32_t bx_code = 0b000100101111111111110001;
@@ -83,6 +117,7 @@ void codegen_inst(struct codegen_table_st *ct, struct parse_node_st *np) {
     switch (np->stmt.inst.type) {
         case DP3 : codegen_dp3(ct, np); break;
         case BX  : codegen_bx(ct, np); break;
+        case MEM : codegen_mem(ct, np); break;
         default  : codegen_error("unknown stmt.inst.type");
     }
 }

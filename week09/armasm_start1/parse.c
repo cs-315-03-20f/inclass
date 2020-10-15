@@ -4,6 +4,7 @@
 
 char *parse_dp_ops[] = PARSE_DP_OPS;
 char *parse_bx_ops[] = PARSE_BX_OPS;
+char *parse_mem_ops[] = PARSE_MEM_OPS;
 
 struct parse_reg_pair_st parse_reg_map[] = PARSE_REG_PAIR_MAP;
 
@@ -50,6 +51,8 @@ enum parse_opcode_enum parse_opcode(struct scan_token_st *tp) {
         rv = OC_DP;
     } else if (parse_is_member(tp->value, parse_bx_ops)) {
         rv = OC_BX;
+    } else if (parse_is_member(tp->value, parse_mem_ops)) {
+        rv = OC_MEM;
     } else {
         parse_error("Bad opcode");
     }
@@ -139,7 +142,7 @@ struct parse_node_st * parse_statement(struct parse_table_st *pt,
 
 struct parse_node_st * parse_instruction(struct parse_table_st *pt,
                                        struct scan_table_st *st) {
-    struct scan_token_st *tp0, *tp1, *tp2, *tp3, *tp4, *tp5;
+    struct scan_token_st *tp0, *tp1, *tp2, *tp3, *tp4, *tp5, *tp6, *tp7;
     struct parse_node_st *np;
     enum parse_opcode_enum opcode;
 
@@ -169,10 +172,12 @@ struct parse_node_st * parse_instruction(struct parse_table_st *pt,
     tp2 = scan_table_get(st, 2);
     tp3 = scan_table_get(st, 3);
     tp4 = scan_table_get(st, 4);
-    tp5 = scan_table_get(st, 5);                
+    tp5 = scan_table_get(st, 5);
+    tp6 = scan_table_get(st, 6);
+    tp7 = scan_table_get(st, 7);
 
      if ((opcode == OC_DP) && (tp1->id == TK_IDENT) && 
-         (tp2->id = TK_COMMA) && (tp3->id == TK_IDENT) && 
+         (tp2->id == TK_COMMA) && (tp3->id == TK_IDENT) && 
          (tp4->id == TK_COMMA) && (tp5->id == TK_IDENT)) {
         /* Parse dp3 instructions: op reg, reg, reg */
   
@@ -195,6 +200,18 @@ struct parse_node_st * parse_instruction(struct parse_table_st *pt,
         /* Accept instruction tokens */
         scan_table_accept_any_n(st, 2);
 
+    } else if ((opcode == OC_MEM) && (tp1->id == TK_IDENT) &&
+        (tp2->id == TK_COMMA) && (tp3->id == TK_LBRACKET) &&
+        (tp4->id == TK_IDENT) && (tp5->id == TK_COMMA) &&
+        (tp6->id == TK_IDENT) && (tp7->id == TK_RBRACKET)) {
+        np->stmt.inst.type = MEM;
+        strncpy(np->stmt.inst.name, tp0->value, SCAN_TOKEN_LEN);
+        np->stmt.inst.mem.rd = parse_reg_to_int(tp1->value);
+        np->stmt.inst.mem.rn = parse_reg_to_int(tp4->value);
+        np->stmt.inst.mem.rm = parse_reg_to_int(tp6->value);
+
+        /* Accept instruction tokens */
+        scan_table_accept_any_n(st, 8);
     } else {
        parse_error("Bad operation");
     }
