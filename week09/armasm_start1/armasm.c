@@ -113,6 +113,12 @@ int main(int argc, char **argv) {
     }
 
     codegen_table_init(&code_table, parse_tree);
+    codegen_stmt(&code_table, parse_tree);
+
+    if (config.debug) {
+        codegen_print_hex(&code_table);
+    }
+    
     codegen_hex_write(&code_table, parse_tree, config.hexfile);
     
     return 0;

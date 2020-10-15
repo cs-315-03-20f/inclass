@@ -118,7 +118,5 @@ void codegen_write(struct codegen_table_st *ct, char *path) {
 }
 
 void codegen_hex_write(struct codegen_table_st *ct, struct parse_node_st *np, char *path) {
-    codegen_stmt(ct, np);
-    codegen_print_hex(ct);
     codegen_write(ct, path);
 }

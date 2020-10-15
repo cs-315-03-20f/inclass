@@ -92,6 +92,13 @@ char * scan_signed_integer(char *p, char *end, struct scan_token_st *tp) {
 char * scan_token(char *p, char *end, struct scan_token_st *tp) {
     if (p == end) {
         p = scan_read_token(tp, p, 0, TK_EOT);
+    } else if (*p == '@') {
+        /* Ignore comments that start with @ */
+        p += 1;
+        while (*p != '\n' && p < end) {
+            p += 1;
+        }
+        p = scan_token(p, end, tp);
     } else if (scan_is_whitespace(*p)) {
         p = scan_whitespace(p, end);
         p = scan_token(p, end, tp);
@@ -182,4 +189,10 @@ bool scan_table_accept(struct scan_table_st *st, enum scan_token_enum tk_expecte
     return false;
 }
 
+void scan_table_accept_any_n(struct scan_table_st *st, int n) {
+    int i;
 
+    for (i = 0; i < n; i++) {
+        scan_table_accept(st, TK_ANY);
+    }
+}

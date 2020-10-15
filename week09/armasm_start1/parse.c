@@ -107,10 +107,12 @@ struct parse_node_st * parse_statements(struct parse_table_st *pt,
     struct parse_node_st *np, *np1, *np2;
     enum scan_token_enum tid;
 
+    parse_eols(st);
     np = parse_statement(pt, st);
     if (!scan_table_accept(st, TK_EOL)) {
         parse_error("expecting EOL");
     }
+    parse_eols(st);
 
     tid = scan_table_get(st, 0)->id;
     if (tid != TK_EOT) {
@@ -153,8 +155,7 @@ struct parse_node_st * parse_instruction(struct parse_table_st *pt,
         tp0 = scan_table_get(st, -2);
         strncpy(np->stmt.inst.label, tp0->value, SCAN_TOKEN_LEN);
         /* Accept the two tokens */
-        scan_table_accept(st, TK_ANY);
-        scan_table_accept(st, TK_ANY);
+        scan_table_accept_any_n(st, 2);
         /* Skip over newlines */        
         parse_eols(st);
     }
@@ -173,6 +174,7 @@ struct parse_node_st * parse_instruction(struct parse_table_st *pt,
      if ((opcode == OC_DP) && (tp1->id == TK_IDENT) && 
          (tp2->id = TK_COMMA) && (tp3->id == TK_IDENT) && 
          (tp4->id == TK_COMMA) && (tp5->id == TK_IDENT)) {
+        /* Parse dp3 instructions: op reg, reg, reg */
   
         np->stmt.inst.type = DP3;
         strncpy(np->stmt.inst.name, tp0->value, SCAN_TOKEN_LEN);
@@ -181,22 +183,17 @@ struct parse_node_st * parse_instruction(struct parse_table_st *pt,
         np->stmt.inst.dp3.rm = parse_reg_to_int(tp5->value);
 
         /* Accept instruction tokens */
-        scan_table_accept(st, TK_ANY);
-        scan_table_accept(st, TK_ANY);
-        scan_table_accept(st, TK_ANY);
-        scan_table_accept(st, TK_ANY);
-        scan_table_accept(st, TK_ANY);
-        scan_table_accept(st, TK_ANY);
+        scan_table_accept_any_n(st, 6);
         
      } else if ((opcode == OC_BX) && (tp1->id == TK_IDENT)) {
+        /* Parse bx instructions: bx reg */ 
   
         strncpy(np->stmt.inst.name, tp0->value, SCAN_TOKEN_LEN);
         np->stmt.inst.type = BX;
         np->stmt.inst.bx.rn = parse_reg_to_int(tp1->value);
 
         /* Accept instruction tokens */
-        scan_table_accept(st, TK_ANY);
-        scan_table_accept(st, TK_ANY);        
+        scan_table_accept_any_n(st, 2);
 
     } else {
        parse_error("Bad operation");

@@ -20,7 +20,7 @@
 
 /*
 
-# Scanner EBNF
+# Scanner EBNF for ARM Assembly
 
 tokenlist   ::= (token)*
 token       ::= ident | imm | symbol
@@ -77,6 +77,7 @@ void scan_table_scan(struct scan_table_st *st, char *input, int len);
 void scan_table_print(struct scan_table_st *st);
 struct scan_token_st * scan_table_get(struct scan_table_st *st, int i);
 bool scan_table_accept(struct scan_table_st *st, enum scan_token_enum tk_expected);
+void scan_table_accept_any_n(struct scan_table_st *st, int n);
 
 /*
  * parse.c
@@ -150,8 +151,6 @@ struct parse_table_st {
     int len;
 };
 
-/* struct parse_table_st parse_table; */
-
 struct parse_reg_pair_st {
     char *name;
     int num;
@@ -211,6 +210,8 @@ enum codegen_cond {
     };
 
 void codegen_table_init(struct codegen_table_st *ct, struct parse_node_st *tree);
+void codegen_stmt(struct codegen_table_st *ct, struct parse_node_st *np);
+void codegen_print_hex(struct codegen_table_st *ct);
 void codegen_hex_write(struct codegen_table_st *ct, struct parse_node_st *np, char *path);
 
 #endif /* _ARMASM_H */
