@@ -97,8 +97,12 @@ statement   ::= directive
 
 directive   ::= "." ident
 
-instruction ::= dp register "," register "," register
+instruction ::= cmp register "," register
+              | cmp register "," immediate
+              | dp register "," register "," register
               | dp register "," register "," immediate
+              | ls register "," register "," register
+              | ls register "," register "," immediate
               | mem register "," "[" register "]"
               | mem register "," "[" register "," immediate "]"
               | branch label
@@ -106,7 +110,11 @@ instruction ::= dp register "," register "," register
 
 register    ::= "r0" | "r1" | ...| "r15" | "sp" | "lr" | "ip"
 
-dp          ::= "add" | "cmp" | "lsl" | "lsr" | "mov"
+cmp         ::= "cmp"
+
+dp          ::= "add" | "mov"
+
+ls          ::= "lsl" | "lsr"
 
 mem         ::= "ldr" |"ldrb" | "str" | "strb"
 
