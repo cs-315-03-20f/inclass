@@ -92,11 +92,17 @@ void codegen_mem_common(struct codegen_table_st *ct, char *name, uint32_t imm, u
     codegen_add_inst(ct, inst);
 }
 
+#if 0
+ldr r0, [r1, ip] /* register form, imm bit is 1, offset is 12 */
+ldr r0, [r1, #4] /* immediate form, imm bit is 0, offset is 4 */
+ldr r0, [r1, #0] /* immediate form, imm bit is 0, offset is 0 */
+#endif
+
 void codegen_mem(struct codegen_table_st *ct, struct parse_node_st *np) {
     codegen_mem_common(
         ct,
         np->stmt.inst.name,
-        0, /*imm*/
+        1, /*imm*/
         np->stmt.inst.mem.rd,
         np->stmt.inst.mem.rn,
         1, /*up*/
@@ -108,7 +114,7 @@ void codegen_memi(struct codegen_table_st *ct, struct parse_node_st *np) {
     codegen_mem_common(
         ct,
         np->stmt.inst.name,
-        1, /*imm*/
+        0, /*imm*/
         np->stmt.inst.memi.rd,
         np->stmt.inst.memi.rn,
         1, /*up*/
@@ -126,13 +132,28 @@ void codegen_bx(struct codegen_table_st *ct, struct parse_node_st *np) {
     codegen_add_inst(ct, inst);
 }
 
+void codegen_mul(struct codegen_table_st *ct, struct parse_node_st *np) {
+    const uint32_t MUL_RD_BIT = 16;
+    const uint32_t MUL_RS_BIT = 8;
+    const uint32_t MUL_CONST_BIT = 4;
+
+    uint32_t inst = 0;
+    inst |= (COND_AL << COND_BIT)
+        | (np->stmt.inst.mul.rd << MUL_RD_BIT)
+        | (np->stmt.inst.mul.rs << MUL_RS_BIT)
+        | (0b1001 << MUL_CONST_BIT)
+        | np->stmt.inst.mul.rm;
+    codegen_add_inst(ct, inst);
+}
+
 void codegen_inst(struct codegen_table_st *ct, struct parse_node_st *np) {
 
     switch (np->stmt.inst.type) {
         case DP3 : codegen_dp3(ct, np); break;
         case BX  : codegen_bx(ct, np); break;
         case MEM : codegen_mem(ct, np); break;
-        case MEMI: codegen_mem(ct, np); break;
+        case MEMI: codegen_memi(ct, np); break;
+        case MUL : codegen_mul(ct, np); break;
         default  : codegen_error("unknown stmt.inst.type");
     }
 }

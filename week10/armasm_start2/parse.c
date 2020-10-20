@@ -5,6 +5,7 @@
 char *parse_dp_ops[] = PARSE_DP_OPS;
 char *parse_bx_ops[] = PARSE_BX_OPS;
 char *parse_mem_ops[] = PARSE_MEM_OPS;
+char *parse_mul_ops[] = PARSE_MUL_OPS;
 
 struct parse_reg_pair_st parse_reg_map[] = PARSE_REG_PAIR_MAP;
 
@@ -53,6 +54,8 @@ enum parse_opcode_enum parse_opcode(struct scan_token_st *tp) {
         rv = OC_BX;
     } else if (parse_is_member(tp->value, parse_mem_ops)) {
         rv = OC_MEM;
+    } else if (parse_is_member(tp->value, parse_mul_ops)) {
+        rv = OC_MUL;
     } else {
         parse_error("Bad opcode");
     }
@@ -223,6 +226,27 @@ struct parse_node_st * parse_instruction(struct parse_table_st *pt,
         np->stmt.inst.memi.rn = parse_reg_to_int(tp4->value);
         np->stmt.inst.memi.imm = 0;
         scan_table_accept_any_n(st, 6); /* accept tp0 through tp5 */
+    } else if ((opcode == OC_MEM) && (tp1->id == TK_IDENT) &&
+        (tp2->id == TK_COMMA) && (tp3->id == TK_LBRACKET) &&
+        (tp4->id == TK_IDENT) && (tp5->id == TK_COMMA) && 
+        (tp6->id == TK_IMM) && (tp7->id == TK_RBRACKET)) {
+        /* e.g. ldr r0, [r1, #4] */
+        np->stmt.inst.type = MEMI;
+        strncpy(np->stmt.inst.name, tp0->value, SCAN_TOKEN_LEN);
+        np->stmt.inst.memi.rd = parse_reg_to_int(tp1->value);
+        np->stmt.inst.memi.rn = parse_reg_to_int(tp4->value);
+        np->stmt.inst.memi.imm = atoi(tp6->value);
+        scan_table_accept_any_n(st, 8); /* accept tp0 through tp7 */
+    } else if ((opcode == OC_MUL) && (tp1->id == TK_IDENT) && 
+        (tp2->id == TK_COMMA) && (tp3->id == TK_IDENT) && 
+        (tp4->id == TK_COMMA) && (tp5->id == TK_IDENT)) {
+        /* mul r1, r2, r3 */
+        np->stmt.inst.type = MUL;
+        strncpy(np->stmt.inst.name, tp0->value, SCAN_TOKEN_LEN);
+        np->stmt.inst.mul.rd = parse_reg_to_int(tp1->value);
+        np->stmt.inst.mul.rm = parse_reg_to_int(tp3->value);
+        np->stmt.inst.mul.rs = parse_reg_to_int(tp5->value);
+        scan_table_accept_any_n(st, 6);
     } else {
        parse_error("Bad operation");
     }

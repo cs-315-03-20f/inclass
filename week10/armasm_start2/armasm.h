@@ -105,6 +105,7 @@ instruction ::= cmp register "," register
               | ls register "," register "," immediate
               | mem register "," "[" register "]"
               | mem register "," "[" register "," immediate "]"
+              | mul register "," register "," register
               | branch label
               | bx register
 
@@ -118,20 +119,23 @@ ls          ::= "lsl" | "lsr"
 
 mem         ::= "ldr" |"ldrb" | "str" | "strb"
 
+mul         ::= "mul"
+
 branch      ::= "b" | "bl" | beq" | "bne" | "bgt" | "bge" | "blt" | "ble"
 
 bx          ::= "bx"
 
 */
 
-enum parse_opcode_enum {OC_DP, OC_BX, OC_MEM, OC_NONE};
+enum parse_opcode_enum {OC_DP, OC_BX, OC_MEM, OC_MUL, OC_NONE};
 
 #define PARSE_DP_OPS {"add", "sub", NULL}
 #define PARSE_BX_OPS {"bx", NULL}
 #define PARSE_MEM_OPS {"ldr", "str", NULL}
+#define PARSE_MUL_OPS {"mul", NULL}
 
 enum parse_stmt_enum {INST, SEQ};
-enum parse_inst_enum {DP3, BX, MEM, MEMI};
+enum parse_inst_enum {DP3, BX, MEM, MEMI, MUL};
 
 struct parse_node_st {
     enum parse_stmt_enum type;
@@ -145,6 +149,7 @@ struct parse_node_st {
                 struct bx {int rn;} bx;
                 struct {int rd; int rn; int rm;} mem;
                 struct {int rd; int rn; int imm;} memi;
+                struct {int rd; int rs; int rm;} mul;
             };
         } inst;
         struct {
