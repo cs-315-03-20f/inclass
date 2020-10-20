@@ -68,7 +68,7 @@ void codegen_dp3(struct codegen_table_st *ct, struct parse_node_st *np) {
         np->stmt.inst.dp3.rm);
 }
 
-void codegen_mem_common(struct codegen_table_st *ct, char *name, uint32_t rd, 
+void codegen_mem_common(struct codegen_table_st *ct, char *name, uint32_t imm, uint32_t rd, 
     uint32_t rn, uint32_t updown, uint32_t offset) {
     const uint32_t MEM_CONST_BIT = 26;
     const uint32_t MEM_IMM_BIT = 25;
@@ -82,7 +82,7 @@ void codegen_mem_common(struct codegen_table_st *ct, char *name, uint32_t rd,
     uint32_t inst = 0; /* imm = 0, byteword = 0, writeback = 0 */
     inst = (COND_AL << COND_BIT)
         | (0b01 << MEM_CONST_BIT)
-        | (1 << MEM_IMM_BIT)
+        | (imm  << MEM_IMM_BIT)
         | (1 << MEM_PRE_BIT)
         | (updown << MEM_UPDOWN_BIT)
         | (ls << MEM_LDRSTR_BIT)
@@ -91,14 +91,28 @@ void codegen_mem_common(struct codegen_table_st *ct, char *name, uint32_t rd,
         | offset;
     codegen_add_inst(ct, inst);
 }
+
 void codegen_mem(struct codegen_table_st *ct, struct parse_node_st *np) {
     codegen_mem_common(
         ct,
         np->stmt.inst.name,
+        0, /*imm*/
         np->stmt.inst.mem.rd,
         np->stmt.inst.mem.rn,
         1, /*up*/
         np->stmt.inst.mem.rm
+    );
+}
+
+void codegen_memi(struct codegen_table_st *ct, struct parse_node_st *np) {
+    codegen_mem_common(
+        ct,
+        np->stmt.inst.name,
+        1, /*imm*/
+        np->stmt.inst.memi.rd,
+        np->stmt.inst.memi.rn,
+        1, /*up*/
+        np->stmt.inst.memi.imm
     );
 }
 
@@ -118,6 +132,7 @@ void codegen_inst(struct codegen_table_st *ct, struct parse_node_st *np) {
         case DP3 : codegen_dp3(ct, np); break;
         case BX  : codegen_bx(ct, np); break;
         case MEM : codegen_mem(ct, np); break;
+        case MEMI: codegen_mem(ct, np); break;
         default  : codegen_error("unknown stmt.inst.type");
     }
 }

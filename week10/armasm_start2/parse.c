@@ -204,6 +204,7 @@ struct parse_node_st * parse_instruction(struct parse_table_st *pt,
         (tp2->id == TK_COMMA) && (tp3->id == TK_LBRACKET) &&
         (tp4->id == TK_IDENT) && (tp5->id == TK_COMMA) &&
         (tp6->id == TK_IDENT) && (tp7->id == TK_RBRACKET)) {
+        /* e.g. ldr r0, [r1, r2] */
         np->stmt.inst.type = MEM;
         strncpy(np->stmt.inst.name, tp0->value, SCAN_TOKEN_LEN);
         np->stmt.inst.mem.rd = parse_reg_to_int(tp1->value);
@@ -212,6 +213,16 @@ struct parse_node_st * parse_instruction(struct parse_table_st *pt,
 
         /* Accept instruction tokens */
         scan_table_accept_any_n(st, 8);
+    } else if ((opcode == OC_MEM) && (tp1->id == TK_IDENT) &&
+        (tp2->id == TK_COMMA) && (tp3->id == TK_LBRACKET) &&
+        (tp4->id == TK_IDENT) && (tp5->id == TK_RBRACKET)) {
+        /* e.g. ldr r0, [r1] */
+        np->stmt.inst.type = MEMI;
+        strncpy(np->stmt.inst.name, tp0->value, SCAN_TOKEN_LEN);
+        np->stmt.inst.memi.rd = parse_reg_to_int(tp1->value);
+        np->stmt.inst.memi.rn = parse_reg_to_int(tp4->value);
+        np->stmt.inst.memi.imm = 0;
+        scan_table_accept_any_n(st, 6); /* accept tp0 through tp5 */
     } else {
        parse_error("Bad operation");
     }

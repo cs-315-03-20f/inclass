@@ -131,7 +131,7 @@ enum parse_opcode_enum {OC_DP, OC_BX, OC_MEM, OC_NONE};
 #define PARSE_MEM_OPS {"ldr", "str", NULL}
 
 enum parse_stmt_enum {INST, SEQ};
-enum parse_inst_enum {DP3, BX, MEM};
+enum parse_inst_enum {DP3, BX, MEM, MEMI};
 
 struct parse_node_st {
     enum parse_stmt_enum type;
@@ -144,6 +144,7 @@ struct parse_node_st {
                 struct {int rd; int rn; int rm;} dp3;
                 struct bx {int rn;} bx;
                 struct {int rd; int rn; int rm;} mem;
+                struct {int rd; int rn; int imm;} memi;
             };
         } inst;
         struct {
