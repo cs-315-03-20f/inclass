@@ -1,4 +1,4 @@
-PROG = lab07
+PROG = project04
 OBJS = armasm.o scan.o parse.o codegen.o
 HEADERS = armasm.h
 
