@@ -158,7 +158,6 @@ struct parse_node_st * parse_instruction(struct parse_table_st *pt,
     tp1 = scan_table_get(st, 1);
 
     if (tp0->id == TK_IDENT && tp1->id == TK_COLON) {
-        tp0 = scan_table_get(st, -2);
         strncpy(np->stmt.inst.label, tp0->value, SCAN_TOKEN_LEN);
         /* Accept the two tokens */
         scan_table_accept_any_n(st, 2);
