@@ -41,10 +41,11 @@ uint32_t codegen_lookup_opcode(char *name) {
 }
 
 void codegen_dp_common(struct codegen_table_st *ct, uint32_t imm, uint32_t op, 
-    uint32_t rn, uint32_t rd, uint32_t op2) {
+    uint32_t set_status, uint32_t rn, uint32_t rd, uint32_t op2) {
 
     const uint32_t DP_IMM_BIT = 25;
     const uint32_t DP_OP_BIT  = 21;
+    const uint32_t DP_S_BIT   = 20;
     const uint32_t DP_RN_BIT  = 16;
     const uint32_t DP_RD_BIT  = 12;
     uint32_t inst = 0;
@@ -52,6 +53,7 @@ void codegen_dp_common(struct codegen_table_st *ct, uint32_t imm, uint32_t op,
     inst = (COND_AL << COND_BIT)
         | (imm << DP_IMM_BIT)
         | (op  << DP_OP_BIT)
+        | (set_status << DP_S_BIT)
         | (rn  << DP_RN_BIT)
         | (rd  << DP_RD_BIT)
         | op2;
@@ -63,6 +65,7 @@ void codegen_dp3(struct codegen_table_st *ct, struct parse_node_st *np) {
         ct,
         0, /*imm*/
         codegen_lookup_opcode(np->stmt.inst.name),
+        0, /* set status */
         np->stmt.inst.dp3.rn,
         np->stmt.inst.dp3.rd,
         np->stmt.inst.dp3.rm);
